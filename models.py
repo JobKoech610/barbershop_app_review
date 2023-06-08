@@ -1,25 +1,30 @@
-from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, MetaData, Table
+import os
+import sys
+
+sys.path.append(os.getcwd)
+from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Table
 from sqlalchemy.orm import relationship, backref , sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-convention = {
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-}
-metadata = MetaData(naming_convention=convention)
+# convention = {
+#     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+# }
+# metadata = MetaData(naming_convention=convention)
 
 Base = declarative_base()
 if __name__ == '__main__':
     engine = create_engine('sqlite:///barbershop.db', echo=True)
     Session = sessionmaker(bind=engine)
     session = Session()
+      
 
-
+ 
 #Table associations
 barbershop_customer = Table(
     'barbershop_customer',
     Base.metadata,
-    Column('barbershop_id',ForeignKey('barbershops_id'),primary_key=True),
-    Column('customer_id',ForeignKey('customers_id'),primary_key=True),
+    Column('barbershop_id',ForeignKey('barbershops.id'),primary_key=True),
+    Column('customer_id',ForeignKey('customers.id'),primary_key=True),
     extend_existing=True,
 
 )
@@ -28,11 +33,12 @@ barbershop_customer = Table(
 #barbershops table
 class Barbershop(Base):
     __tablename__ = 'barbershops'
-    id = Column(Integer(),primary_key=True),
+    id = Column(Integer(),primary_key=True)
     name = Column(String())
     location = Column(String())
-    customers = relationship('Customer',secondary='barbershop_customer',back_populates=('customers'))
-    reviews = relationship("Review", backref=backref("barbershop")) 
+    price = Column(Integer())
+    customers = relationship('Customer',secondary='barbershop_customer',back_populates=('barbershops'))
+    reviews = relationship("Review", backref=backref("barbershops")) 
 
     def __repr__(self):
     
@@ -43,11 +49,11 @@ class Barbershop(Base):
 #Customer table
 class Customer(Base):
     __tablename__ = 'customers'
-    id = Column(Integer(),primary_key=True),
+    id = Column(Integer(),primary_key=True)
     first_name = Column(String())
-    last_name = Column(String())  
-    customers = relationship('Barbershop',secondary='barbershop_customer',back_populates=('barbershops')) 
-    reviews = relationship("Review", backref=backref("customer")) 
+    last_name = Column(String())
+    barbershops = relationship('Barbershop',secondary='barbershop_customer',back_populates=('customers'))
+    reviews = relationship("Review", backref=backref("customers")) 
 
     def __repr__(self):
     
@@ -60,7 +66,7 @@ class Review(Base):
     __tablename__ = 'reviews'
     id = Column(Integer(), primary_key=True)
     star_rating = Column(Integer())
-    babershop_id = Column(Integer(), ForeignKey('babershop_id'))
+    barbershop_id = Column(Integer(), ForeignKey('barbershops.id'))
     customer_id = Column(Integer(), ForeignKey('customers.id'))
     
 
@@ -68,6 +74,6 @@ class Review(Base):
     
         return f'Review(id={self.id}, ' + \
             f'star_rating={self.star_rating}, ' + \
-            f'babershop_id={self.babershop_id}), ' +\
+            f'barbershop_id={self.barbershop_id}), ' +\
             f'customer_id={self.customer_id})' 
 
