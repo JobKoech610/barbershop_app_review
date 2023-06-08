@@ -17,8 +17,6 @@ if __name__ == '__main__':
     Session = sessionmaker(bind=engine)
     session = Session()
       
-
- 
 #Table associations
 barbershop_customer = Table(
     'barbershop_customer',
@@ -28,7 +26,6 @@ barbershop_customer = Table(
     extend_existing=True,
 
 )
-
 
 #barbershops table
 class Barbershop(Base):
@@ -53,7 +50,35 @@ class Customer(Base):
     first_name = Column(String())
     last_name = Column(String())
     barbershops = relationship('Barbershop',secondary='barbershop_customer',back_populates=('customers'))
-    reviews = relationship("Review", backref=backref("customers")) 
+    reviews = relationship("Review", backref=backref("customer")) 
+    #check review for a specific customer
+    def customer_review(self):
+        return self.reviews
+    #customer = session.query(Customer)[10]
+    # customer.customer_review()
+
+    def customer_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+    #customer = session.query(Customer)[10]
+    #customer.customer_full_name()  
+
+    def customer_barbershop(self):
+        return self.barbershops
+    #customer = session.query(Customer)[10]
+    #customer.customer_barbershop()
+
+    def add_review(self,barbershop,rating,session):
+        review = Review(customer=self, barbershop=barbershop, star_rating=rating)
+        session.add(review)
+        session.commit()
+
+    def delete_reviews(self, barbershop, session):
+        reviews_to_delete = [review for review in self.reviews if review.barbershop == barbershop]
+        for review in reviews_to_delete:
+            session.delete(review)
+        session.commit()    
+
+
 
     def __repr__(self):
     
@@ -69,6 +94,13 @@ class Review(Base):
     barbershop_id = Column(Integer(), ForeignKey('barbershops.id'))
     customer_id = Column(Integer(), ForeignKey('customers.id'))
     
+    #return the customer for this review
+    def customer(self):
+        return self.customer
+    
+    #return the barbershop for this review
+    def barbershop(self):
+        return self.barbershop
 
     def __repr__(self):
     
