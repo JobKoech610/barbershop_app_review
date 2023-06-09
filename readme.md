@@ -5,7 +5,9 @@ created a database with 3 tables
 
 
 **CLI
-i used click library
+i used the click library
+Validates user input.
+Provides detailed prompts and messages to the user throughout the execution of the CLI.
 
 how to run the program 
 -fork the repository
