@@ -42,7 +42,7 @@ if __name__ == '__main__':
     review = [
         Review(
             star_rating = random.randint(1,5),
-            barbershop_id = random.randint(1,20),
+            babershop_id = random.randint(1,20),
             customer_id = random.randint(1,20)
         )
     for i in range(20)]

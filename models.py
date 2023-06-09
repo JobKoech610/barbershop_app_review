@@ -27,6 +27,36 @@ barbershop_customer = Table(
 
 )
 
+class Review(Base):
+    __tablename__ = 'reviews'
+    id = Column(Integer(), primary_key=True)
+    star_rating = Column(Integer())
+    babershop_id = Column(Integer(), ForeignKey('barbershops.id'))
+    customer_id = Column(Integer(), ForeignKey('customers.id'))
+    
+    #return the customer for this review
+    def custom(self):
+        return self.customer
+    
+    
+    #return the barbershop for this review
+    def barbershop_review(self):
+        return self.barbershop
+    
+    def full_review(self):
+        return f"Review for  by {self.customer.customer_full_name()}: {self.star_rating} stars."
+    #rev = session.query(Review).first()
+    #rev.full_review()
+
+    def __repr__(self):
+    
+        return f'Review:id={self.id}, ' + \
+            f'star_rating={self.star_rating}, ' + \
+            f'babershop_id={self.babershop_id}, ' +\
+            f'customer_id={self.customer_id}' 
+
+
+
 #barbershops table
 class Barbershop(Base):
     __tablename__ = 'barbershops'
@@ -36,6 +66,30 @@ class Barbershop(Base):
     price = Column(Integer())
     customers = relationship('Customer',secondary='barbershop_customer',back_populates=('barbershops'))
     reviews = relationship("Review", backref=backref("barbershops")) 
+
+    def review(self):
+        return self.reviews
+    #barber = session.query(Barbershop).first().reviews
+
+    def cust(self):
+        return self.customers
+    #barber = session.query(Barbershop).first()
+    #barber.customer()
+
+    def barbershop_name(self):
+        return f"{self.name}"
+    #barber = session.query(Barbershop)[10]
+    #barber.barbershop_name()  
+
+    
+    @classmethod
+    def fanciest(cls,session):
+        return session.query(cls).order_by(cls.price.desc()).first()
+    #Barbershop.fanciest(session)
+
+    def all_reviews(self):
+        return [review.full_review() for review in self.reviews]
+    #barber.all_reviews()
 
     def __repr__(self):
     
@@ -50,7 +104,7 @@ class Customer(Base):
     first_name = Column(String())
     last_name = Column(String())
     barbershops = relationship('Barbershop',secondary='barbershop_customer',back_populates=('customers'))
-    reviews = relationship("Review", backref=backref("customer")) 
+    reviews = relationship("Review", backref=backref("customers")) 
     #check review for a specific customer
     def customer_review(self):
         return self.reviews
@@ -58,7 +112,7 @@ class Customer(Base):
     # customer.customer_review()
 
     def customer_full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return [f"{self.first_name} {self.last_name}"]
     #customer = session.query(Customer)[10]
     #customer.customer_full_name()  
 
@@ -86,26 +140,4 @@ class Customer(Base):
             f'first_name={self.first_name}, ' + \
             f'last_name={self.last_name})' 
 
-
-class Review(Base):
-    __tablename__ = 'reviews'
-    id = Column(Integer(), primary_key=True)
-    star_rating = Column(Integer())
-    barbershop_id = Column(Integer(), ForeignKey('barbershops.id'))
-    customer_id = Column(Integer(), ForeignKey('customers.id'))
-    
-    #return the customer for this review
-    def customer(self):
-        return self.customer
-    
-    #return the barbershop for this review
-    def barbershop(self):
-        return self.barbershop
-
-    def __repr__(self):
-    
-        return f'Review(id={self.id}, ' + \
-            f'star_rating={self.star_rating}, ' + \
-            f'barbershop_id={self.barbershop_id}), ' +\
-            f'customer_id={self.customer_id})' 
 
